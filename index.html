@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumine - Links</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.5s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .creator-tag {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            z-index: 100;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(0, 150, 255, 0.3), rgba(0, 200, 150, 0.3));
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .creator-tag:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 200, 150, 0.3);
+        }
+
+        /* Effet parallaxe et particules */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 200, 150, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
+        }
+
+        .admin-lock-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(0, 150, 255, 0.3), rgba(0, 200, 150, 0.3));
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 12px 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 150, 255, 0.2);
+        }
+
+        .admin-lock-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 150, 255, 0.5), rgba(0, 200, 150, 0.5));
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 12px 40px rgba(0, 200, 150, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0096ff 0%, #00c896 100%);
+            padding: 40px;
+            border-radius: 25px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 150, 255, 0.4);
+            animation: slideUp 0.4s ease;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            color: white;
+            font-size: 28px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: white;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-content button:hover {
+            background: white;
+            color: #0096ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.3);
+        }
+
+        .close-btn {
+            background: rgba(255, 59, 48, 0.3) !important;
+            border-color: #ff3b30 !important;
+        }
+
+        .close-btn:hover {
+            background: #ff3b30 !important;
+            color: white !important;
+        }
+
+        /* Panel de personnalisation en bas à gauche */
+        .customization-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(0, 150, 255, 0.95), rgba(0, 200, 150, 0.95));
+            padding: 25px;
+            padding-right: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 150, 255, 0.4);
+            z-index: 999;
+            max-width: 320px;
+            max-height: calc(100vh - 100px);
+            overflow-y: scroll;
+            overflow-x: hidden;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            overscroll-behavior: contain;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .close-panel-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            line-height: 1;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-panel-btn:hover {
+            background: white;
+            color: #0096ff;
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .customization-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .customization-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .customization-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.3));
+            border-radius: 10px;
+        }
+
+        .customization-panel::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5));
+        }
+
+        .customization-panel h3 {
+            margin-bottom: 20px;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .customization-panel .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .customization-panel .section:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .customization-panel .section h4 {
+            margin-bottom: 10px;
+            color: white;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .customization-panel input[type="color"] {
+            width: 100%;
+            height: 45px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .customization-panel input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .customization-panel input[type="file"]:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .customization-panel button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .apply-btn {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .apply-btn:hover {
+            background: white;
+            color: #0096ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Bouton d'ajout de lien flottant */
+        .add-link-float {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #0096ff, #00c896);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 10px 40px rgba(0, 150, 255, 0.4);
+            z-index: 998;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+            width: 65px;
+            height: 65px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 40px rgba(0, 150, 255, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 50px rgba(0, 200, 150, 0.6);
+            }
+        }
+
+        .add-link-float:hover {
+            transform: scale(1.2) rotate(90deg);
+            box-shadow: 0 15px 50px rgba(0, 200, 150, 0.6);
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-section {
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .profile-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            object-fit: cover;
+            border: 5px solid rgba(255,255,255,0.9);
+            box-shadow: 0 15px 50px rgba(0, 150, 255, 0.4);
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 20px 60px rgba(0, 200, 150, 0.6);
+            border-color: #00c896;
+        }
+
+        .profile-name {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #001f3f, #0096ff, #00c896);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .profile-bio {
+            font-size: 16px;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-top: 30px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #000000;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0, 150, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #00c896, #0096ff);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .link-item:hover::before {
+            left: 100%;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .link-item:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 200, 150, 0.5);
+            border-color: white;
+        }
+
+        .link-item:active {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .link-logo {
+            width: 35px;
+            height: 35px;
+            margin-right: 20px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover .link-logo {
+            transform: scale(1.2) rotate(360deg);
+        }
+
+        .delete-btn {
+            position: absolute;
+            right: 15px;
+            background: rgba(255, 59, 48, 0.9);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover .delete-btn {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .delete-btn:hover {
+            background: #ff3b30;
+            transform: scale(1.1);
+        }
+
+        /* Liste des liens dans le panel */
+        .links-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .link-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .link-list-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .link-list-item span {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .link-list-item button {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .link-list-item button:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
+        }
+
+        .link-list-item .edit-btn {
+            background: #0096ff;
+        }
+
+        .link-list-item .edit-btn:hover {
+            background: #0077cc;
+        }
+
+        /* Scrollbar personnalisée */
+        .links-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .links-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .links-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+        }
+
+        .links-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .customization-panel {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                max-width: none;
+            }
+            
+            .add-link-float {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body id="mainBody" style="background: linear-gradient(135deg, #0096ff 0%, #00c896 100%);">
+    <div class="creator-tag">Site by Fléau</div>
+    <button class="admin-lock-btn" onclick="showAdminModal()">🔒</button>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <h2>🔐 Code Admin</h2>
+            <input type="password" id="adminCode" placeholder="Entrez le code secret">
+            <button onclick="checkAdminCode()">✓ Valider</button>
+            <button class="close-btn" onclick="closeAdminModal()">✕ Annuler</button>
+        </div>
+    </div>
+
+    <div id="addLinkModal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Nouveau Lien</h2>
+            <input type="text" id="linkUrl" placeholder="🔗 URL complète (https://...)">
+            <input type="text" id="linkName" placeholder="📝 Nom du site">
+            <input type="file" id="linkLogo" accept="image/*" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 12px; background: rgba(255,255,255,0.1); color: white; cursor: pointer;">
+            <button onclick="addNewLink()">✓ Ajouter</button>
+            <button class="close-btn" onclick="closeAddLinkModal()">✕ Annuler</button>
+        </div>
+    </div>
+
+    <div id="editLinkModal" class="modal">
+        <div class="modal-content">
+            <h2>✏️ Modifier le lien</h2>
+            <input type="text" id="editLinkUrl" placeholder="🔗 URL complète (https://...)">
+            <input type="text" id="editLinkName" placeholder="📝 Nom du site">
+            <input type="file" id="editLinkLogo" accept="image/*" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 12px; background: rgba(255,255,255,0.1); color: white; cursor: pointer;">
+            <div id="editCurrentLogo" style="text-align: center; margin-bottom: 15px;"></div>
+            <button onclick="saveEditLink()">✓ Sauvegarder</button>
+            <button class="close-btn" onclick="closeEditLinkModal()">✕ Annuler</button>
+        </div>
+    </div>
+
+    <button id="addLinkFloat" class="add-link-float" onclick="showAddLinkModal()">➕</button>
+
+    <div id="customizationPanel" class="customization-panel">
+        <div class="panel-header">
+            <h3>🎨 Personnalisation</h3>
+            <button class="close-panel-btn" onclick="hideCustomizationPanel()">✕</button>
+        </div>
+        
+        <div class="section">
+            <h4>🖼️ Fond d'écran</h4>
+            <input type="color" id="bgColor" value="#0096ff">
+            <input type="file" id="bgImage" accept="image/*">
+            <button class="apply-btn" onclick="applyBgChange()">Appliquer le fond</button>
+        </div>
+
+        <div class="section">
+            <h4>🎭 Couleur des cadres</h4>
+            <input type="color" id="frameColor" value="#00c896">
+            <button class="apply-btn" onclick="applyFrameChange()">Appliquer aux cadres</button>
+        </div>
+
+        <div class="section">
+            <h4>🖼️ Changer la photo de profil</h4>
+            <input type="file" id="profileImage" accept="image/*">
+            <button class="apply-btn" onclick="applyProfileChange()">Changer la photo</button>
+        </div>
+
+        <div class="section">
+            <h4>🗑️ Gérer les liens</h4>
+            <div class="links-list" id="linksList"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="profile-section">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%230096ff;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300c896;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='80' fill='url(%23grad)'/%3E%3Ctext x='100' y='115' font-family='Arial' font-size='60' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E" alt="Lumine" class="profile-image" id="profileImg">
+            <div class="profile-name">LUMINE</div>
+            <div class="profile-bio">✨ Artiste & Créateur ✨</div>
+        </div>
+        
+        <div class="links-container" id="linksContainer"></div>
+    </div>
+
+    <script>
+     const firebaseConfig = {
+         apiKey: "AIzaSyAV9C25BFsJil6Q8Nh3BCOB2OieNFuvGMk",
+         authDomain: "lumine-linktree-305ab.firebaseapp.com",
+         databaseURL: "https://lumine-linktree-305ab-default-rtdb.europe-west1.firebasedatabase.app",
+         projectId: "lumine-linktree-305ab",
+         storageBucket: "lumine-linktree-305ab.firebasestorage.app",
+         messagingSenderId: "457708240660",
+         appId: "1:457708240660:web:de489576bb9d21dbb9cc01"
+     };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let isAdmin = false;
+        let currentFrameColor = '#00c896';
+        let editingIndex = -1;
+        let currentBgStyle = 'gradient';
+        let currentBgData = null;
+        
+        // Fonction pour charger les données depuis Firebase
+        async function loadStoredData() {
+            try {
+                // Écouter les changements en temps réel pour les liens
+                database.ref('links').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        links = data;
+                        renderLinks();
+                    }
+                });
+
+                // Écouter les changements pour la couleur des cadres
+                database.ref('frameColor').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        currentFrameColor = data;
+                        renderLinks();
+                    }
+                });
+
+                // Écouter les changements pour le fond d'écran
+                database.ref('background').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        if (data.type === 'image') {
+                            document.getElementById('mainBody').style.background = `url(${data.data})`;
+                            document.getElementById('mainBody').style.backgroundSize = 'cover';
+                            document.getElementById('mainBody').style.backgroundPosition = 'center';
+                            document.getElementById('mainBody').style.backgroundAttachment = 'fixed';
+                        } else {
+                            document.getElementById('mainBody').style.background = data.data;
+                        }
+                    }
+                });
+
+                // Écouter les changements pour la photo de profil
+                database.ref('profileImage').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        document.getElementById('profileImg').src = data;
+                    }
+                });
+
+            } catch (error) {
+                console.log('Première visite ou données non disponibles');
+                renderLinks();
+            }
+        }
+
+        // Fonction pour sauvegarder les liens dans Firebase
+        async function saveLinks() {
+            try {
+                await database.ref('links').set(links);
+                console.log('Liens sauvegardés dans Firebase !');
+            } catch (error) {
+                console.error('Erreur sauvegarde liens:', error);
+            }
+        }
+
+        // Fonction pour sauvegarder la couleur des cadres dans Firebase
+        async function saveFrameColor() {
+            try {
+                await database.ref('frameColor').set(currentFrameColor);
+                console.log('Couleur des cadres sauvegardée dans Firebase !');
+            } catch (error) {
+                console.error('Erreur sauvegarde couleur:', error);
+            }
+        }
+
+        // Fonction pour sauvegarder le fond d'écran dans Firebase
+        async function saveBackground(type, data) {
+            try {
+                await database.ref('background').set({type, data});
+                console.log('Fond d\'écran sauvegardé dans Firebase !');
+            } catch (error) {
+                console.error('Erreur sauvegarde fond:', error);
+            }
+        }
+
+        // Fonction pour sauvegarder la photo de profil dans Firebase
+        async function saveProfileImage(imageData) {
+            try {
+                await database.ref('profileImage').set(imageData);
+                console.log('Photo de profil sauvegardée dans Firebase !');
+            } catch (error) {
+                console.error('Erreur sauvegarde profil:', error);
+            }
+        }
+        
+        const defaultLinks = [
+            {
+                name: 'Instagram',
+                url: 'https://www.instagram.com/lumine_561',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"%3E%3Cpath fill="%23E4405F" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/%3E%3C/svg%3E'
+            },
+            {
+                name: 'YouTube',
+                url: 'https://youtube.com/@luminethefurry4581',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"%3E%3Cpath fill="%23FF0000" d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/%3E%3C/svg%3E'
+            },
+            {
+                name: 'Wattpad',
+                url: 'https://www.wattpad.com/user/Lumine5631',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Cpath fill="%23FF6500" d="M55.4 327.5c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3zm64 0c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3zm64 0c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3zm64 0c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3zm64 0c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3zm64 0c-4.1 11.4-10.6 21.1-19.5 29.1-8.9 8-19.4 14.3-31.5 18.8l10.4 30.3c12.1-4.5 22.6-10.8 31.5-18.8 8.9-8 15.4-17.7 19.5-29.1l-10.4-30.3z"/%3E%3C/svg%3E'
+            },
+            {
+                name: 'Toyhouse',
+                url: 'https://toyhou.se/Lumine56',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"%3E%3Cpath fill="%23FFA500" d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/%3E%3C/svg%3E'
+            },
+            {
+                name: 'Cara',
+                url: 'https://cara.app/lumine56/all',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Ccircle cx="256" cy="256" r="256" fill="%23000000"/%3E%3Ctext x="256" y="350" font-size="300" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold"%3EC%3C/text%3E%3C/svg%3E'
+            },
+            {
+                name: 'Art Fight',
+                url: 'https://artfight.net/~Lumine56',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Cpath fill="%234CAF50" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z" fill="%23FF6B6B"/%3E%3C/svg%3E'
+            },
+            {
+                name: 'Vinted',
+                url: 'https://www.vinted.fr/member/230266090',
+                logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Ccircle cx="256" cy="256" r="256" fill="%2309B1BA"/%3E%3Cpath d="M180 360L150 200h60l30 160zm80-160h60l-30 160h-60zm80 0h60l-30 160h-60z" fill="white"/%3E%3C/svg%3E'
+            }
+        ];
+
+        let links = [...defaultLinks];
+
+        function renderLinks() {
+            const container = document.getElementById('linksContainer');
+            container.innerHTML = '';
+            
+            links.forEach((link, index) => {
+                const linkEl = document.createElement('a');
+                linkEl.className = 'link-item';
+                linkEl.href = link.url;
+                linkEl.target = '_blank';
+                linkEl.style.background = `linear-gradient(135deg, ${currentFrameColor}, ${adjustColor(currentFrameColor, -20)})`;
+                
+                const logoSrc = link.logo || `https://www.google.com/s2/favicons?domain=${link.url}&sz=128`;
+                
+                linkEl.innerHTML = `
+                    <img src="${logoSrc}" alt="${link.name}" class="link-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23000000%22%3E%3Cpath d=%22M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z%22/%3E%3C/svg%3E'">
+                    ${link.name}
+                    ${isAdmin ? `<button class="delete-btn" onclick="deleteLink(${index}, event)">🗑️ Supprimer</button>` : ''}
+                `;
+                
+                container.appendChild(linkEl);
+            });
+
+            renderLinksList();
+        }
+
+        function renderLinksList() {
+            if (!isAdmin) return;
+            
+            const listContainer = document.getElementById('linksList');
+            listContainer.innerHTML = '';
+            
+            links.forEach((link, index) => {
+                const item = document.createElement('div');
+                item.className = 'link-list-item';
+                item.innerHTML = `
+                    <span>${link.name}</span>
+                    <div>
+                        <button class="edit-btn" onclick="editLink(${index})">✏️</button>
+                        <button onclick="deleteLink(${index}, event)">✕</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function adjustColor(color, amount) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+            const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+            const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+            return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+
+        function showAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('adminCode').focus();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('adminCode').value = '';
+        }
+
+        function checkAdminCode() {
+            const code = document.getElementById('adminCode').value;
+            if (code === '564311') {
+                isAdmin = true;
+                closeAdminModal();
+                const floatBtn = document.getElementById('addLinkFloat');
+                floatBtn.style.display = 'flex';
+                document.getElementById('customizationPanel').style.display = 'block';
+                document.querySelector('.admin-lock-btn').innerHTML = '🔓';
+                renderLinks();
+            } else {
+                alert('❌ Code incorrect !');
+                document.getElementById('adminCode').value = '';
+            }
+        }
+
+        function showAddLinkModal() {
+            document.getElementById('addLinkModal').style.display = 'flex';
+            document.getElementById('linkUrl').focus();
+        }
+
+        function closeAddLinkModal() {
+            document.getElementById('addLinkModal').style.display = 'none';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkLogo').value = '';
+        }
+
+        function addNewLink() {
+            const url = document.getElementById('linkUrl').value.trim();
+            const name = document.getElementById('linkName').value.trim();
+            const logoFile = document.getElementById('linkLogo').files[0];
+
+            if (url && name) {
+                if (logoFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        links.push({
+                            name: name,
+                            url: url,
+                            logo: e.target.result
+                        });
+                        saveLinks();
+                        renderLinks();
+                        closeAddLinkModal();
+                    };
+                    reader.readAsDataURL(logoFile);
+                } else {
+                    links.push({
+                        name: name,
+                        url: url,
+                        logo: `https://www.google.com/s2/favicons?domain=${url}&sz=128`
+                    });
+                    saveLinks();
+                    renderLinks();
+                    closeAddLinkModal();
+                }
+            } else {
+                alert('⚠️ Veuillez remplir au moins l\'URL et le nom du site');
+            }
+        }
+
+        function deleteLink(index, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (confirm('🗑️ Voulez-vous vraiment supprimer ce lien ?')) {
+                links.splice(index, 1);
+                saveLinks();
+                renderLinks();
+            }
+        }
+
+        function closeCustomizationPanel() {
+            document.getElementById('customizationPanel').style.display = 'none';
+        }
+
+        function hideCustomizationPanel() {
+            const panel = document.getElementById('customizationPanel');
+            panel.style.display = 'none';
+        }
+
+        function toggleCustomizationPanel() {
+            const panel = document.getElementById('customizationPanel');
+            
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                hideCustomizationPanel();
+            }
+        }
+
+        function editLink(index) {
+            editingIndex = index;
+            const link = links[index];
+            document.getElementById('editLinkUrl').value = link.url;
+            document.getElementById('editLinkName').value = link.name;
+            document.getElementById('editLinkLogo').value = '';
+            
+            const currentLogoDiv = document.getElementById('editCurrentLogo');
+            currentLogoDiv.innerHTML = `
+                <p style="color: white; margin-bottom: 10px;">Logo actuel :</p>
+                <img src="${link.logo}" style="width: 50px; height: 50px; object-fit: contain; padding: 5px; border-radius: 8px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));">
+            `;
+            
+            document.getElementById('editLinkModal').style.display = 'flex';
+        }
+
+        function closeEditLinkModal() {
+            document.getElementById('editLinkModal').style.display = 'none';
+            editingIndex = -1;
+            document.getElementById('editLinkUrl').value = '';
+            document.getElementById('editLinkName').value = '';
+            document.getElementById('editLinkLogo').value = '';
+            document.getElementById('editCurrentLogo').innerHTML = '';
+        }
+
+        function saveEditLink() {
+            const url = document.getElementById('editLinkUrl').value.trim();
+            const name = document.getElementById('editLinkName').value.trim();
+            const logoFile = document.getElementById('editLinkLogo').files[0];
+
+            if (url && name && editingIndex !== -1) {
+                if (logoFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        links[editingIndex] = {
+                            name: name,
+                            url: url,
+                            logo: e.target.result
+                        };
+                        saveLinks();
+                        renderLinks();
+                        closeEditLinkModal();
+                    };
+                    reader.readAsDataURL(logoFile);
+                } else {
+                    links[editingIndex] = {
+                        name: name,
+                        url: url,
+                        logo: links[editingIndex].logo
+                    };
+                    saveLinks();
+                    renderLinks();
+                    closeEditLinkModal();
+                }
+            } else {
+                alert('⚠️ Veuillez remplir au moins l\'URL et le nom du site');
+            }
+        }
+
+        function applyProfileChange() {
+            const file = document.getElementById('profileImage').files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImg').src = e.target.result;
+                    saveProfileImage(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applyBgChange() {
+            const color = document.getElementById('bgColor').value;
+            const file = document.getElementById('bgImage').files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('mainBody').style.background = `url(${e.target.result})`;
+                    document.getElementById('mainBody').style.backgroundSize = 'cover';
+                    document.getElementById('mainBody').style.backgroundPosition = 'center';
+                    document.getElementById('mainBody').style.backgroundAttachment = 'fixed';
+                    saveBackground('image', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const color2 = adjustColor(color, -30);
+                const gradient = `linear-gradient(135deg, ${color} 0%, ${color2} 100%)`;
+                document.getElementById('mainBody').style.background = gradient;
+                saveBackground('gradient', gradient);
+            }
+        }
+
+        function applyFrameChange() {
+            currentFrameColor = document.getElementById('frameColor').value;
+            saveFrameColor();
+            renderLinks();
+        }
+
+        function showBgPicker() {
+            // Fonction pour compatibilité
+        }
+
+        function closeBgPicker() {
+            // Fonction pour compatibilité
+        }
+
+        function showFramePicker() {
+            // Fonction pour compatibilité
+        }
+
+        function closeFramePicker() {
+            // Fonction pour compatibilité
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        document.getElementById('adminCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAdminCode();
+        });
+
+        loadStoredData();
+    </script>
+</body>
+</html>
